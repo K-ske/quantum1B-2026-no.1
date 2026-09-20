@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>状態ベクトルへの招待 — 量子力学1B 第1講</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" id="MathJax-script" async></script>
+
+<style>
+  /* ============ TOKENS — light (default, "slide" mode) ============ */
+  :root {
+    --bg: #dbe7f4;
+    --bg-soft: #cadcee;
+    --paper: #eef4fb;
+    --ink: #122642;
+    --ink-soft: #47617e;
+    --rule: rgba(18,38,66,0.16);
+    --navy: #1b3a5c;
+    --navy-deep: #0d2338;
+    --gold: #b07f22;
+    --gold-soft: #f0e2c0;
+    --rose: #b23a2e;
+    --rose-soft: #f4dcd6;
+    --blue-chalk: #2c6a8f;
+    --blue-soft: #cfe1f0;
+    --shadow: rgba(18,38,66,0.12);
+    --font-head: "Shippori Mincho", serif;
+    --font-body: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+    --font-hand: "Caveat", cursive;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a1b30;
+      --bg-soft: #10233c;
+      --paper: #122944;
+      --ink: #e6eef8;
+      --ink-soft: #a6bcd8;
+      --rule: rgba(230,238,248,0.16);
+      --navy: #8fc1e3;
+      --navy-deep: #cfe4f2;
+      --gold: #e8c468;
+      --gold-soft: rgba(232,196,104,0.14);
+      --rose: #e2896d;
+      --rose-soft: rgba(226,137,109,0.14);
+      --blue-chalk: #8fc1e3;
+      --blue-soft: rgba(143,193,227,0.14);
+      --shadow: rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a1b30;
+    --bg-soft: #10233c;
+    --paper: #122944;
+    --ink: #e6eef8;
+    --ink-soft: #a6bcd8;
+    --rule: rgba(230,238,248,0.16);
+    --navy: #8fc1e3;
+    --navy-deep: #cfe4f2;
+    --gold: #e8c468;
+    --gold-soft: rgba(232,196,104,0.14);
+    --rose: #e2896d;
+    --rose-soft: rgba(226,137,109,0.14);
+    --blue-chalk: #8fc1e3;
+    --blue-soft: rgba(143,193,227,0.14);
+    --shadow: rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.9;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--gold-soft); }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    background: linear-gradient(180deg, var(--navy-deep), var(--navy) 88%);
+    color: #f0f5fa;
+    padding: 96px 24px;
+    overflow: hidden;
+    text-align: center;
+  }
+  .hero-inner { max-width: 760px; margin: 0 auto; position: relative; z-index: 2; }
+  .hero h1 {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: clamp(2.1rem, 6vw, 3.1rem);
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  /* theme toggle */
+  .theme-toggle {
+    position: fixed; top: 18px; right: 18px; z-index: 50;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    cursor: pointer;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+
+  /* ============ SECTIONS ============ */
+  main { padding: 8px 0 40px; }
+  section.block { padding: 52px 0; }
+  section.block + section.block { border-top: none; }
+
+  .kicker {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .kicker .num {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--gold);
+  }
+  .kicker .label {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  h2.title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 1.7rem;
+    margin: 0 0 20px;
+    color: var(--ink);
+  }
+  h3.sub {
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 32px 0 12px;
+    color: var(--ink);
+  }
+  p { margin: 0 0 16px; color: var(--ink); }
+  .muted { color: var(--ink-soft); }
+
+  /* chalk divider */
+  .divider { width: 100%; height: 22px; margin: 8px 0 0; opacity: 0.5; }
+  .divider path { stroke: var(--ink-soft); fill: none; stroke-width: 1.5; }
+
+  /* diagram figures */
+  .figure {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 18px 18px 14px;
+    margin: 22px 0;
+  }
+  .figure svg { width: 100%; height: auto; display: block; }
+  .figure figcaption {
+    margin-top: 10px;
+    font-size: 0.84rem;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .figure-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 22px 0; }
+  @media (max-width: 640px) { .figure-row { grid-template-columns: 1fr; } }
+  .figure-row .figure { margin: 0; }
+
+  /* callout boxes */
+  .box {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 20px 22px;
+    margin: 18px 0;
+    box-shadow: 0 1px 0 var(--shadow);
+  }
+  .box.def { border-left: 4px solid var(--gold); }
+  .box.axiom { border-left: 4px solid var(--navy); background: var(--blue-soft); }
+  .box.warn { border-left: 4px solid var(--rose); background: var(--rose-soft); }
+  .box .box-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 0 0 8px;
+    letter-spacing: 0.02em;
+  }
+  .box.axiom .box-label { color: var(--navy); }
+  .box.warn .box-label { color: var(--rose); }
+  .box p:last-child { margin-bottom: 0; }
+
+  /* math display scroll safety */
+  mjx-container { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+  .eq { margin: 16px 0; }
+  .eq.center { text-align: center; }
+
+  /* two/three-up property cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 22px 0;
+  }
+  @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 18px;
+  }
+  .card .card-n {
+    font-family: var(--font-head);
+    color: var(--gold);
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+  .card h4 { margin: 0 0 8px; font-size: 1rem; font-family: var(--font-body); font-weight: 700; }
+  .card p { font-size: 0.92rem; margin: 0; color: var(--ink-soft); }
+
+  /* dictionary / correspondence table */
+  table.corr {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 0.95rem;
+    overflow-x: auto;
+    display: block;
+  }
+  table.corr thead, table.corr tbody { display: table; width: 100%; table-layout: fixed; }
+  table.corr th, table.corr td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  table.corr th { color: var(--ink-soft); font-weight: 700; font-size: 0.82rem; }
+  table.corr td.eqcell { white-space: normal; }
+
+  /* accordion (step-by-step derivation) */
+  .steps { margin: 18px 0; }
+  .step {
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background: var(--paper);
+    overflow: hidden;
+  }
+  .step summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .step summary::-webkit-details-marker { display: none; }
+  .step summary::before {
+    content: "▸";
+    color: var(--gold);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .step[open] summary::before { transform: rotate(90deg); }
+  .step .step-body { padding: 0 16px 18px; font-size: 0.95rem; }
+
+  /* quiz */
+  .quiz-item {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 20px 22px;
+    margin: 16px 0;
+  }
+  .quiz-item .q-num { color: var(--gold); font-weight: 800; font-family: var(--font-head); }
+  .reveal-btn {
+    margin-top: 10px;
+    background: var(--navy);
+    color: #f4f1e8;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .reveal-btn:hover { opacity: 0.85; }
+  .answer {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--rule);
+  }
+  .answer.shown { display: block; }
+  .answer .a-label { font-size: 0.78rem; color: var(--gold); font-weight: 700; margin-bottom: 6px; }
+
+  /* footer note */
+  .note {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+    margin-top: 8px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px 60px;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+  }
+
+  a { color: var(--blue-chalk); }
+
+  code {
+    background: var(--bg-soft);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="配色を切り替える">🌓 黒板 / 紙面</button>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1>量子力学1B　1回目</h1>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ INTRO ============ -->
+  <section class="block">
+    <div class="kicker"><span class="label">はじめに</span></div>
+    <h2 class="title">今日、何をするのか</h2>
+    <p>今日の後半でやることを一言で言うと——<strong>「状態」を表す方法を、具体的な関数 ψ(x) から、もっと抽象的な「ベクトル」|ψ⟩ に引っ越しさせる</strong>ということです。引っ越し先の道具として、線形代数のベクトル空間の知識を使います。1年生の線形代数を少し思い出しながら読んでください。</p>
+
+    <div class="box axiom">
+      <p class="box-label">前期の復習：量子力学の公理（1〜3）</p>
+      <p><strong>公理1（状態の記述）</strong> — 系の状態は波動関数 ψ(x,t) で表される。</p>
+      <p><strong>公理2（物理量）</strong> — 物理量はエルミート演算子で表され、測定値はその固有値で表される。</p>
+      <p><strong>公理3（Born則）</strong> — 測定確率は展開係数の絶対値の2乗で表される。</p>
+      <p class="muted" style="margin-bottom:0;">この3つに加えて、公理4（波動関数の収縮）と公理5（シュレーディンガー方程式による時間発展）がありますが、今日は公理1〜3を抽象化することに集中します。</p>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 700 22"><path d="M0 11 Q 50 2, 100 11 T 200 11 T 300 11 T 400 11 T 500 11 T 600 11 T 700 11"/></svg>
+
+  <!-- ============ 公理1 復習 ============ -->
+  <section class="block">
+    <div class="kicker"><span class="num">01</span><span class="label">前期の復習</span></div>
+    <h2 class="title">波動関数はどう展開できたか</h2>
+    <p>波動関数 ψ(x,t) は、正規直交な固有関数 <span>$u_n(x)$</span> を使って次のように展開できました。</p>
+    <div class="eq center">$$ \psi(x,t) = \sum_n c_n\, u_n(x)\, \exp\!\left(-i\frac{E_n}{\hbar}t\right) $$</div>
+    <p><span>$c_n$</span> は複素数の展開係数、<span>$E_n$</span> はエネルギー固有値、<span>$u_n(x)$</span> は <span>$E_n$</span> に対応する固有関数です。<span>$u_n(x)$</span> は次の「正規直交性」を満たします。</p>
+    <div class="eq center">$$ \int_{-\infty}^{\infty} dx\, u_n^*(x)\, u_m(x) = \delta_{nm} $$</div>
+    <p>右辺のクロネッカーのデルタ <span>$\delta_{nm}$</span> は、<span>$n=m$</span> なら1、それ以外は0という記号です。異なる固有関数同士は「直交」していて、同じ固有関数同士は「1に規格化」されている——だから正規直交、と呼びます。</p>
+
+    <div class="box def">
+      <p class="box-label">展開係数の取り出し方</p>
+      <p>この正規直交性を使うと、波動関数に <span>$u_n^*(x)$</span> をかけて積分するだけで、展開係数 <span>$c_n$</span> だけを抜き出せます。</p>
+      <div class="eq center">$$ c_n = \int_{-\infty}^{\infty} \psi(x,0)\, u_n^*(x)\, dx $$</div>
+      <p style="margin-bottom:0;">これを元の展開式に代入し直すと、次の「完全性関係」が出てきます。</p>
+      <div class="eq center">$$ \sum_n u_n^*(x')\, u_n(x) = \delta(x - x') $$</div>
+      <p style="margin-bottom:0;">これはクロネッカーのデルタの「連続バージョン」だと思ってください。<span>$x = x'$</span> のところだけ無限大になり、それ以外は0になるデルタ関数です。この式が成り立つことを「固有関数の集合 <span>$\{u_n\}$</span> が完全系をなす」と言います。</p>
+    </div>
+
+    <h3 class="sub">物理量とエルミート演算子</h3>
+    <p>公理2では、物理量は「演算子」という、波動関数に作用して別の関数を作る操作で表されました。演算子は波動関数に作用して初めて意味を持ちます。</p>
+    <table class="corr">
+      <thead><tr><th style="width:32%">物理量</th><th>演算子としての定義</th></tr></thead>
+      <tbody>
+        <tr><td>運動量</td><td class="eqcell">$\hat p\,\psi(x,t) = -i\hbar \dfrac{d}{dx}\psi(x,t)$</td></tr>
+        <tr><td>位置</td><td class="eqcell">$\hat x\,\psi(x,t) = x\,\psi(x,t)$</td></tr>
+        <tr><td>ハミルトニアン</td><td class="eqcell">$\hat H\,\psi = \left(-\dfrac{\hbar^2}{2m}\dfrac{d^2}{dx^2} + V(x)\right)\psi(x,t)$</td></tr>
+      </tbody>
+    </table>
+    <div class="box warn">
+      <p class="box-label">よくある誤解</p>
+      <p style="margin-bottom:0;"><span>$\hat x\,\psi = x\,\psi$</span> は「固有方程式」ではありません。固有方程式は、<em>xがどんな値であっても</em>右辺が一定の定数倍になるべきものですが、ここでは <span>$x$</span> が2倍になれば右辺も2倍になってしまい、<span>$x$</span> に紐づいています。定数ではないので、これは固有方程式の形をしていない、という点に注意してください。</p>
+    </div>
+    <p>エルミート演算子の固有値は必ず実数になります（証明は前期ノート参照）。実際に測定される物理量は実数なので、これは都合がいい性質です。</p>
+
+    <h3 class="sub">Born則と確率の保存</h3>
+    <p>公理3は、エネルギー固有値 <span>$E_n$</span> を観測する確率が、展開係数の絶対値の2乗で与えられる、というルールでした。</p>
+    <div class="eq center">$$ P(E_n) = |c_n|^2 $$</div>
+    <p>「なぜそうなるのか」は公理なので問いません。ニュートン力学に運動方程式や作用反作用の法則があるように、量子力学にはこの規則がある——そこが出発点です。確率の総和は1になるはずなので、</p>
+    <div class="eq center">$$ \sum_n |c_n|^2 = 1 $$</div>
+    <p>が成り立ちます。実はこの条件（展開係数の規格化）を認めると、波動関数自体の規格化 <span>$\int |\psi|^2 dx = 1$</span> も自動的に満たされることが、直交性を使って示せます。</p>
+  </section>
+
+  <svg class="divider" viewBox="0 0 700 22"><path d="M0 11 Q 50 20, 100 11 T 200 11 T 300 11 T 400 11 T 500 11 T 600 11 T 700 11"/></svg>
+
+  <!-- ============ 本質は何か ============ -->
+  <section class="block">
+    <div class="kicker"><span class="num">02</span><span class="label">抽象化への第一歩</span></div>
+    <h2 class="title">波動関数の「本質」を抜き出す</h2>
+    <p>ここまでの議論は、常に具体的な波動関数 ψ(x) と、sin・cosのような具体的な固有関数を出発点にしていました。でも、実はψ(x)という具体的な形を出さなくても成り立つ、もっと本質的な性質が3つ隠れています。</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-n">1</div>
+        <h4>重ね合わせができる</h4>
+        <p>波動関数はスカラー倍と線形和（足し算）が定義できる。<span>$c_1\psi_1 + c_2\psi_2$</span> も、また別の許される状態になる。</p>
+      </div>
+      <div class="card">
+        <div class="card-n">2</div>
+        <h4>基底で展開できる</h4>
+        <p>正規直交な固有関数の集合という「基底」を使えば、どんな状態も係数付きの和として展開できる。</p>
+      </div>
+      <div class="card">
+        <div class="card-n">3</div>
+        <h4>内積・ノルムが定義できる</h4>
+        <p>2つの波動関数の複素共役をとって掛け、積分すれば「内積」になる。自分自身との内積は大きさ（ノルム）の2乗になる。</p>
+      </div>
+    </div>
+
+    <div class="box def">
+      <p class="box-label">なぜ「重ね合わせ」が本質的なのか</p>
+      <p style="margin-bottom:0;">シュレーディンガー方程式 <span>$i\hbar \frac{\partial \psi}{\partial t} = \hat H \psi$</span> は <span>$\psi$</span> について線形な微分方程式です（<span>$\psi^2$</span> や <span>$\sin\psi$</span> のような項が出てこない）。線形な方程式の解を何個か見つけて足し合わせたものも、また同じ方程式の解になります。だから量子状態は重ね合わせられる——これは偶然ではなく、方程式の線形性そのものから来ています。</p>
+    </div>
+
+    <p>この3つの性質——スカラー倍・線形和が定義できて、基底で展開できて、内積が定義できる——は、実は<strong>線形代数の「ベクトル空間」がまさに満たす性質</strong>と同じです。つまり、量子力学が扱う「状態」は、ベクトル空間のベクトルとまったく同じ構造を持っている、ということが見えてきます。</p>
+    <p>特に、内積とノルムが定義できるようなベクトル空間のことを<strong>ヒルベルト空間</strong>と呼びます。（より正確には、内積・ノルムに加えて「完備性」という条件も必要ですが、今日は省略します。）量子力学の状態は、ヒルベルト空間上のベクトルとして定義し直すことができるのです。</p>
+  </section>
+
+  <svg class="divider" viewBox="0 0 700 22"><path d="M0 11 Q 50 2, 100 11 T 200 11 T 300 11 T 400 11 T 500 11 T 600 11 T 700 11"/></svg>
+
+  <!-- ============ ベクトル空間 ============ -->
+  <section class="block">
+    <div class="kicker"><span class="num">03</span><span class="label">道具立て</span></div>
+    <h2 class="title">ベクトル空間とブラケット記法</h2>
+    <p>ここから、Diracが導入した「ブラケット記法」を使って、N次元の複素ベクトル空間を組み立て直します。表記は新しく見えますが、中身は1年生の線形代数と同じです。</p>
+
+    <h3 class="sub">ケットベクトル — ただの表記の変更</h3>
+    <p>ベクトル <span>$\boldsymbol v$</span> を、太字の代わりに <span>$|v\rangle$</span> と書きます。これを「<strong>ケットベクトル</strong>」と呼びます。中身が変わったわけではなく、書き方が変わっただけです。</p>
+    <div class="eq center">$$ \text{スカラー倍：}\ c|v\rangle\ (c\in\mathbb C) \qquad\qquad \text{線形和：}\ c_1|v\rangle + c_2|u\rangle $$</div>
+
+    <h3 class="sub">基底ベクトルで成分表示する</h3>
+    <p>N次元の空間に対して、デカルト座標のx軸・y軸・z軸に相当するような基底ベクトル <span>$|e_1\rangle,\dots,|e_N\rangle$</span> を用意します。<span>$|e_n\rangle$</span> は「n番目だけ1で、あとは全部0」の列ベクトルです。</p>
+    <div class="eq center">$$ |e_1\rangle=\begin{pmatrix}1\\0\\\vdots\\0\end{pmatrix},\quad |e_2\rangle=\begin{pmatrix}0\\1\\\vdots\\0\end{pmatrix},\ \dots,\ |e_N\rangle=\begin{pmatrix}0\\0\\\vdots\\1\end{pmatrix} $$</div>
+    <p>この基底を使うと、任意のベクトルを成分で書けます。</p>
+    <div class="eq center">$$ |v\rangle = \sum_n v_n |e_n\rangle = \begin{pmatrix}v_1\\v_2\\\vdots\\v_N\end{pmatrix} $$</div>
+
+    <figure class="figure">
+      <svg viewBox="0 0 340 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="基底ベクトルによるベクトルの成分分解">
+        <defs>
+          <marker id="arrow-ink" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" style="fill:var(--ink)"/>
+          </marker>
+          <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" style="fill:var(--blue-chalk)"/>
+          </marker>
+        </defs>
+        <!-- axes -->
+        <line x1="40" y1="180" x2="300" y2="180" style="stroke:var(--ink-soft)" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+        <line x1="40" y1="180" x2="40" y2="20" style="stroke:var(--ink-soft)" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+        <text x="288" y="172" style="fill:var(--blue-chalk)" font-size="16">|e₁⟩</text>
+        <text x="48" y="30" style="fill:var(--blue-chalk)" font-size="16">|e₂⟩</text>
+        <!-- projections -->
+        <line x1="230" y1="180" x2="230" y2="60" style="stroke:var(--rule)" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="40" y1="60" x2="230" y2="60" style="stroke:var(--rule)" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <!-- vector v -->
+        <line x1="40" y1="180" x2="230" y2="60" style="stroke:var(--gold)" stroke-width="2.5" marker-end="url(#arrow-ink)"/>
+        <text x="150" y="105" style="fill:var(--gold)" font-size="17" font-weight="700">|v⟩</text>
+        <!-- component labels -->
+        <text x="220" y="198" style="fill:var(--ink)" font-size="15">v₁</text>
+        <text x="8" y="65" style="fill:var(--ink)" font-size="15">v₂</text>
+      </svg>
+      <figcaption>ベクトル |v⟩ を基底 |e₁⟩, |e₂⟩ の方向に「分解」すると、それぞれの軸に沿った長さが成分 v₁, v₂ になる。3次元以上でも同じ考え方が続く。</figcaption>
+    </figure>
+
+    <h3 class="sub">ブラベクトル — 内積を取るための「相棒」</h3>
+    <p>内積を計算するには、あるベクトルに対して「対」をなす相棒が必要です。その相棒を<strong>ブラベクトル</strong> <span>$\langle v|$</span> と呼びます。ケット <span>$|v\rangle$</span> の成分を転置して複素共役をとったものがブラです（この操作を<strong>ダガー</strong>†と呼びます）。</p>
+    <div class="eq center">$$ \langle v| \equiv |v\rangle^\dagger = \sum_n v_n^*\langle e_n| = (v_1^*, v_2^*, \dots, v_N^*) $$</div>
+
+    <div class="box def">
+      <p class="box-label">ケットとブラのイメージ</p>
+      <p style="margin-bottom:0;">ケット <span>$|v\rangle$</span> は縦（列）ベクトル、ブラ <span>$\langle v|$</span> は横（行）ベクトルで、成分は複素共役になっています。「ブラケット bra-c-ket」という言葉遊びで、<span>$\langle\ |\ \rangle$</span> を半分に割って bra と ket にした、というのがDiracの命名です。</p>
+    </div>
+
+    <h3 class="sub">内積 — ブラを左から、ケットを右からかける</h3>
+    <p>ケットに左からブラをかけると内積になります。</p>
+    <div class="eq center">$$ \langle u|v\rangle \equiv \langle u|\,|v\rangle = u_1^*v_1 + u_2^*v_2 + \cdots + u_N^*v_N = \sum_{i=1}^{N} u_i^* v_i $$</div>
+    <p>自分自身との内積 <span>$\langle v|v\rangle = |v_1|^2+\cdots+|v_N|^2$</span> は、ベクトルの大きさの2乗（ノルムの2乗）に対応します。</p>
+    <div class="box warn">
+      <p class="box-label">実ベクトルとの違い</p>
+      <p style="margin-bottom:0;">高校や1年生の線形代数で習った実数ベクトルの内積と違い、複素ベクトル空間の内積では、片方だけ複素共役をとります。<span>$\langle u|v\rangle$</span> と <span>$\langle v|u\rangle$</span> は一般に等しくなく、互いに複素共役の関係にあります：<span>$\langle v|u\rangle = \langle u|v\rangle^*$</span>。ブラとケットの順番を入れ替えると、複素共役がつくと覚えておいてください。</p>
+    </div>
+
+    <p>先ほど導入した基底ベクトル <span>$\{|e_1\rangle,\dots,|e_N\rangle\}$</span> は、次の2つの性質——正規直交性と完全系——を満たします。</p>
+    <table class="corr">
+      <thead><tr><th style="width:34%">性質</th><th>数式</th></tr></thead>
+      <tbody>
+        <tr><td>正規直交性</td><td class="eqcell">$\langle e_n|e_m\rangle = \delta_{nm}$</td></tr>
+        <tr><td>完全系</td><td class="eqcell">$\displaystyle\sum_n |e_n\rangle\langle e_n| = I$（単位行列）</td></tr>
+      </tbody>
+    </table>
+    <div class="figure-row">
+      <figure class="figure">
+        <svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="直交する基底ベクトルの内積はゼロ">
+          <defs>
+            <marker id="arrow-o1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--gold)"/></marker>
+            <marker id="arrow-o2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--blue-chalk)"/></marker>
+          </defs>
+          <line x1="30" y1="140" x2="170" y2="140" style="stroke:var(--gold)" stroke-width="2.5" marker-end="url(#arrow-o1)"/>
+          <line x1="30" y1="140" x2="30" y2="20" style="stroke:var(--blue-chalk)" stroke-width="2.5" marker-end="url(#arrow-o2)"/>
+          <path d="M42 140 L42 128 L30 128" style="stroke:var(--ink-soft);fill:none" stroke-width="1.3"/>
+          <text x="155" y="132" style="fill:var(--gold)" font-size="14">|eₙ⟩</text>
+          <text x="36" y="30" style="fill:var(--blue-chalk)" font-size="14">|eₘ⟩</text>
+          <text x="100" y="165" style="fill:var(--ink)" font-size="14" text-anchor="middle">⟨eₙ|eₘ⟩ = 0（直交）</text>
+        </svg>
+        <figcaption>向きの違う基底ベクトル同士は、内積をとると打ち消し合ってゼロになる。</figcaption>
+      </figure>
+      <figure class="figure">
+        <svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="同じ基底ベクトルの内積は1">
+          <defs>
+            <marker id="arrow-o3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--gold)"/></marker>
+          </defs>
+          <line x1="30" y1="140" x2="170" y2="140" style="stroke:var(--gold)" stroke-width="2.5" marker-end="url(#arrow-o3)"/>
+          <line x1="30" y1="132" x2="170" y2="132" style="stroke:var(--gold)" stroke-width="2.5" opacity="0.45" marker-end="url(#arrow-o3)"/>
+          <text x="150" y="118" style="fill:var(--gold)" font-size="14">|eₙ⟩</text>
+          <text x="100" y="165" style="fill:var(--ink)" font-size="14" text-anchor="middle">⟨eₙ|eₙ⟩ = 1（規格化）</text>
+        </svg>
+        <figcaption>同じ基底ベクトル同士の内積は、長さ1に規格化されているので1になる。</figcaption>
+      </figure>
+    </div>
+
+    <p>正規直交性から、ある基底ベクトルとの内積をとれば、その方向の成分だけを取り出せることがわかります。</p>
+    <div class="eq center">$$ \langle e_n|v\rangle = v_n $$</div>
+
+    <h3 class="sub">外積 — 順番を逆にすると、行列ができる</h3>
+    <p>今度は逆に、ケットに右からブラをかけてみます。これを<strong>外積</strong>と呼びます（ベクトル解析で習う外積とは全くの別物なので注意してください）。</p>
+    <div class="eq center">$$ |v\rangle\langle u| \equiv \begin{pmatrix}v_1\\v_2\\\vdots\\v_N\end{pmatrix}(u_1^*,u_2^*,\dots,u_N^*) = \begin{pmatrix} v_1u_1^* & \cdots & v_1u_N^* \\ v_2u_1^* & \cdots & v_2u_N^* \\ \vdots & \ddots & \vdots \\ v_Nu_1^* & \cdots & v_Nu_N^* \end{pmatrix} $$</div>
+    <p>内積は「数」を作る操作でしたが、外積は「行列」を作る操作です。<span>$\langle\ |\ \rangle$</span>（ブラケットの順）が内積、<span>$|\ \rangle\langle\ |$</span>（ケットブラの順）が外積、と覚えてください。</p>
+
+    <figure class="figure">
+      <svg viewBox="0 0 360 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ケットとブラの外積が行列を作る様子">
+        <!-- column vector -->
+        <rect x="10" y="20" width="34" height="100" rx="4" style="fill:none;stroke:var(--gold)" stroke-width="1.6"/>
+        <text x="27" y="45" text-anchor="middle" style="fill:var(--ink)" font-size="13">v₁</text>
+        <text x="27" y="75" text-anchor="middle" style="fill:var(--ink)" font-size="13">v₂</text>
+        <text x="27" y="105" text-anchor="middle" style="fill:var(--ink)" font-size="13">v₃</text>
+        <text x="55" y="76" style="fill:var(--ink-soft)" font-size="18">×</text>
+        <!-- row vector -->
+        <rect x="72" y="60" width="120" height="30" rx="4" style="fill:none;stroke:var(--blue-chalk)" stroke-width="1.6"/>
+        <text x="96" y="80" text-anchor="middle" style="fill:var(--ink)" font-size="12">u₁*</text>
+        <text x="132" y="80" text-anchor="middle" style="fill:var(--ink)" font-size="12">u₂*</text>
+        <text x="168" y="80" text-anchor="middle" style="fill:var(--ink)" font-size="12">u₃*</text>
+        <text x="205" y="80" style="fill:var(--ink-soft)" font-size="18">=</text>
+        <!-- resulting matrix grid -->
+        <g style="stroke:var(--rule)" stroke-width="1.2">
+          <rect x="226" y="20" width="120" height="100" rx="4" style="fill:var(--bg-soft);stroke:var(--rule)"/>
+          <line x1="266" y1="20" x2="266" y2="120"/>
+          <line x1="306" y1="20" x2="306" y2="120"/>
+          <line x1="226" y1="53" x2="346" y2="53"/>
+          <line x1="226" y1="86" x2="346" y2="86"/>
+        </g>
+        <text x="286" y="12" text-anchor="middle" style="fill:var(--ink-soft)" font-size="12">N × N 行列</text>
+      </svg>
+      <figcaption>縦の列ベクトル |v⟩ に、横の行ベクトル ⟨u| をかけると、内積のように1つの数にはならず、成分ごとの掛け算でマス目が埋まった N×N の行列ができる。</figcaption>
+    </figure>
+  </section>
+
+  <svg class="divider" viewBox="0 0 700 22"><path d="M0 11 Q 50 20, 100 11 T 200 11 T 300 11 T 400 11 T 500 11 T 600 11 T 700 11"/></svg>
+
+  <!-- ============ 演算子 ============ -->
+  <section class="block">
+    <div class="kicker"><span class="num">04</span><span class="label">ベクトル空間における演算子</span></div>
+    <h2 class="title">演算子は行列としてふるまう</h2>
+    <p>演算子とは、あるベクトルに作用することで、新しいベクトルを作るもの——<span>$\hat A|v\rangle = |v'\rangle$</span> です。抽象的に聞こえますが、実体は「行列」そのものです。</p>
+    <p>たとえば2次元のベクトル空間で <span>$\hat A = \begin{pmatrix}a&b\\c&d\end{pmatrix}$</span>、<span>$|v\rangle=\begin{pmatrix}v_1\\v_2\end{pmatrix}$</span> とすると、</p>
+    <div class="eq center">$$ \hat A|v\rangle = \begin{pmatrix}av_1+bv_2\\cv_1+dv_2\end{pmatrix}\ (=|v'\rangle) $$</div>
+    <p>という新しいベクトルが得られます。これは高校・1年生でやった行列とベクトルの積そのものです。</p>
+
+    <h3 class="sub">演算子は外積で書ける</h3>
+    <p>演算子は、ケットとブラの外積 <span>$\hat A \equiv |\alpha\rangle\langle\beta|$</span> の形でも表せます。あるベクトル <span>$|v\rangle$</span> に作用させると、</p>
+    <div class="eq center">$$ \hat A|v\rangle = |\alpha\rangle\langle\beta|v\rangle = (\langle\beta|v\rangle)\,|\alpha\rangle $$</div>
+    <p>という形になります。<span>$\langle\beta|v\rangle$</span> は単なる複素数（内積）なので、これは「<span>$|\alpha\rangle$</span> をある複素数倍したベクトル」ということになります。つまり <span>$|v\rangle$</span> が <span>$\hat A$</span> という演算子（外積）によって、<span>$|\alpha\rangle$</span> 方向の新しいベクトルに変わった、ということです。</p>
+
+    <div class="box def">
+      <p class="box-label">射影演算子</p>
+      <p>特に重要な例が<strong>射影演算子</strong> <span>$\hat P_n \equiv |e_n\rangle\langle e_n|$</span> です。これをベクトル <span>$|v\rangle$</span> に作用させると、</p>
+      <div class="eq center">$$ \hat P_n|v\rangle \equiv |e_n\rangle\langle e_n|v\rangle = v_n|e_n\rangle $$</div>
+      <p style="margin-bottom:0;">つまり、<span>$|v\rangle$</span> の中から「<span>$e_n$</span> 方向の成分だけ」を抜き出す働きをします。<span>$v_n$</span> だけが値を持ち、それ以外はゼロの、n番目の成分だけを残したベクトルが返ってきます。</p>
+    </div>
+
+    <figure class="figure">
+      <svg viewBox="0 0 340 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="射影演算子がベクトルの成分を抜き出す様子">
+        <defs>
+          <marker id="arrow-p1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--ink)"/></marker>
+          <marker id="arrow-p2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--gold)"/></marker>
+        </defs>
+        <line x1="40" y1="180" x2="300" y2="180" style="stroke:var(--blue-chalk)" stroke-width="1.5" marker-end="url(#arrow-p1)"/>
+        <text x="288" y="172" style="fill:var(--blue-chalk)" font-size="15">|eₙ⟩</text>
+        <line x1="40" y1="180" x2="220" y2="50" style="stroke:var(--ink-soft)" stroke-width="2" marker-end="url(#arrow-p1)"/>
+        <text x="200" y="70" style="fill:var(--ink-soft)" font-size="15">|v⟩</text>
+        <line x1="220" y1="50" x2="220" y2="180" style="stroke:var(--rule)" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="40" y1="180" x2="220" y2="180" style="stroke:var(--gold)" stroke-width="3" marker-end="url(#arrow-p2)"/>
+        <text x="110" y="200" style="fill:var(--gold)" font-size="14" font-weight="700">vₙ|eₙ⟩</text>
+      </svg>
+      <figcaption>射影演算子 P̂ₙ は、ベクトル |v⟩ の「影」を軸 |eₙ⟩ の上に落とすようなもの。得られる vₙ|eₙ⟩ が、|v⟩ の n番目の成分だけを取り出したベクトル。</figcaption>
+    </figure>
+
+    <p>さきほどの完全系の関係式は、射影演算子を使って次のように理解できます。</p>
+    <div class="eq center">$$ |v\rangle = \sum_n v_n|e_n\rangle = \sum_n |e_n\rangle\langle e_n|v\rangle = \sum_n \hat P_n|v\rangle \quad\Longrightarrow\quad \sum_n \hat P_n = I $$</div>
+    <p>言い換えると——「任意のベクトルがある基底で展開できる」ということと「その基底が完全系をなす」ということは、同じことを言っています。ベクトルを成分ごとに射影して足し集めれば、必ず元のベクトルに戻る、という当たり前の事実が、この式の中身です。</p>
+
+    <figure class="figure">
+      <svg viewBox="0 0 380 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="各方向への射影を足し合わせると元のベクトルに戻る">
+        <defs>
+          <marker id="arrow-c1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--gold)"/></marker>
+          <marker id="arrow-c2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--ink)"/></marker>
+        </defs>
+        <line x1="15" y1="100" x2="65" y2="100" style="stroke:var(--gold)" stroke-width="3" marker-end="url(#arrow-c1)"/>
+        <text x="35" y="118" text-anchor="middle" style="fill:var(--ink-soft)" font-size="12">P̂₁|v⟩</text>
+        <text x="85" y="100" style="fill:var(--ink-soft)" font-size="18">+</text>
+        <line x1="105" y1="100" x2="155" y2="100" style="stroke:var(--gold)" stroke-width="3" marker-end="url(#arrow-c1)"/>
+        <text x="125" y="118" text-anchor="middle" style="fill:var(--ink-soft)" font-size="12">P̂₂|v⟩</text>
+        <text x="175" y="100" style="fill:var(--ink-soft)" font-size="18">+ ⋯ +</text>
+        <line x1="225" y1="100" x2="275" y2="100" style="stroke:var(--gold)" stroke-width="3" marker-end="url(#arrow-c1)"/>
+        <text x="245" y="118" text-anchor="middle" style="fill:var(--ink-soft)" font-size="12">P̂ₙ|v⟩</text>
+        <text x="292" y="100" style="fill:var(--ink-soft)" font-size="18">=</text>
+        <line x1="312" y1="100" x2="368" y2="60" style="stroke:var(--ink)" stroke-width="3" marker-end="url(#arrow-c2)"/>
+        <text x="365" y="52" style="fill:var(--ink)" font-size="14" font-weight="700">|v⟩</text>
+      </svg>
+      <figcaption>すべての軸方向への射影を足し集めると、必ず元のベクトルに戻る。これが完全性関係 Σₙ P̂ₙ = I の意味。</figcaption>
+    </figure>
+  </section>
+
+  <svg class="divider" viewBox="0 0 700 22"><path d="M0 11 Q 50 2, 100 11 T 200 11 T 300 11 T 400 11 T 500 11 T 600 11 T 700 11"/></svg>
+
+  <!-- ============ 状態ベクトル ============ -->
+  <section class="block">
+    <div class="kicker"><span class="num">05</span><span class="label">量子力学への適用</span></div>
+    <h2 class="title">状態ベクトル |ψ⟩</h2>
+    <p>ここまでの一般的なベクトル空間の議論を、そのまま量子力学に当てはめます。波動関数 <span>$\psi(x)$</span> の代わりに、状態ベクトル <span>$|\psi\rangle$</span> というものを導入します。</p>
+
+    <div class="box axiom">
+      <p class="box-label">公理1' — 状態の記述（抽象版）</p>
+      <p style="margin-bottom:0;">系の状態は、ヒルベルト空間上のベクトル <strong>状態ベクトル |ψ⟩</strong> として定義される。</p>
+    </div>
+
+    <p>ある物理量（エルミート演算子）<span>$\hat A$</span> の固有状態を <span>$|u_n\rangle$</span>、対応する固有値を <span>$a_n$</span> とすると、固有方程式は次のように書けます。</p>
+    <div class="eq center">$$ \hat A|u_n\rangle = a_n|u_n\rangle $$</div>
+    <p>これは1年生の線形代数で習った「行列に作用させると、元のベクトルの定数倍になって返ってくる」という固有ベクトル・固有値の関係そのものです。この <span>$|u_n\rangle$</span> の集合が正規直交完全系をなすとき、任意の状態ベクトル <span>$|\psi\rangle$</span> はこの基底で展開できます。</p>
+    <div class="eq center">$$ |\psi\rangle = \sum_n c_n|u_n\rangle \qquad \langle u_m|u_n\rangle=\delta_{mn}, \quad \sum_n|u_n\rangle\langle u_n| = I $$</div>
+    <p>展開係数は、ブラをかけるだけで取り出せます。</p>
+    <div class="eq center">$$ c_n = \langle u_n|\psi\rangle $$</div>
+
+    <h3 class="sub">波動関数の議論との対応</h3>
+    <p>実は、これまでの波動関数を使った議論は、すべてブラケット記法の特別な場合になっています。対応関係を並べてみましょう。</p>
+    <table class="corr">
+      <thead><tr><th>波動関数の議論</th><th>ブラケット記法</th></tr></thead>
+      <tbody>
+        <tr><td class="eqcell">$c_n = \displaystyle\int \psi(x,0)u_n^*(x)\,dx$</td><td class="eqcell">$c_n = \langle u_n|\psi\rangle$</td></tr>
+        <tr><td class="eqcell">$\displaystyle\int u_n^*(x)u_m(x)\,dx = \delta_{nm}$</td><td class="eqcell">$\langle u_n|u_m\rangle = \delta_{nm}$</td></tr>
+        <tr><td class="eqcell">$\displaystyle\sum_n u_n^*(x')u_n(x) = \delta(x-x')$</td><td class="eqcell">$\displaystyle\sum_n|u_n\rangle\langle u_n| = I$</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">積分という「関数空間での内積」が、ブラケットという「ベクトル空間での内積」に置き換わっただけで、構造はまったく同じです。波動関数 ψ(x) と状態ベクトル |ψ⟩ の間の具体的な関係（ψ(x) がブラケットのどの内積に対応するか）は、次回扱います。</p>
+  </section>
+
+  <svg class="divider" viewBox="0 0 700 22"><path d="M0 11 Q 50 20, 100 11 T 200 11 T 300 11 T 400 11 T 500 11 T 600 11 T 700 11"/></svg>
+
+  <!-- ============ 期待値 ============ -->
+  <section class="block">
+    <div class="kicker"><span class="num">06</span><span class="label">組み立て直し</span></div>
+    <h2 class="title">期待値をブラケットで書く</h2>
+    <p>物理量 <span>$\hat A$</span> の期待値は、統計力学と同じ考え方で「確率 × 確率変数」の総和です。ここでの確率変数は固有値 <span>$a_n$</span>、確率はBorn則 <span>$|c_n|^2$</span> です。</p>
+    <div class="eq center">$$ \langle\hat A\rangle = \sum_n a_n|c_n|^2 $$</div>
+    <p>これをブラケットの言葉に書き換えていくと、驚くほどシンプルな形にまとまります。クリックして、導出のステップを1つずつ追ってみましょう。</p>
+
+    <div class="steps">
+      <details class="step" open>
+        <summary>ステップ1 — |c_n|² をブラケットで書く</summary>
+        <div class="step-body">
+          <p><span>$c_n = \langle u_n|\psi\rangle$</span> なので、<span>$|c_n|^2 = c_n^* c_n$</span> は次のように書けます。ブラケットの複素共役は、ブラとケットを入れ替えれば求まります：<span>$\langle u_n|\psi\rangle^* = \langle\psi|u_n\rangle$</span>。</p>
+          <div class="eq center">$$ |c_n|^2 = \langle\psi|u_n\rangle\langle u_n|\psi\rangle $$</div>
+        </div>
+      </details>
+      <details class="step">
+        <summary>ステップ2 — 固有値 aₙ を演算子に戻す</summary>
+        <div class="step-body">
+          <p>固有方程式 <span>$\hat A|u_n\rangle = a_n|u_n\rangle$</span> を逆向きに使うと、数である <span>$a_n$</span> を演算子 <span>$\hat A$</span> の作用に「戻す」ことができます。</p>
+          <div class="eq center">$$ a_n|c_n|^2 = \langle\psi|u_n\rangle\, a_n\langle u_n|\psi\rangle = \langle\psi|u_n\rangle\langle u_n|\hat A|\psi\rangle $$</div>
+          <p style="margin-bottom:0;">（<span>$\hat A|\psi\rangle$</span> に左から <span>$\langle u_n|$</span> をかけたものが <span>$\langle u_n|\hat A|\psi\rangle$</span> です。順序を入れ替えても、間に挟まっているのはただの数なので問題ありません。）</p>
+        </div>
+      </details>
+      <details class="step">
+        <summary>ステップ3 — n について総和をとり、完全性関係を使う</summary>
+        <div class="step-body">
+          <div class="eq center">$$ \langle\hat A\rangle = \sum_n a_n|c_n|^2 = \sum_n \langle\psi|u_n\rangle\langle u_n|\hat A|\psi\rangle = \langle\psi|\left(\sum_n|u_n\rangle\langle u_n|\right)\hat A|\psi\rangle $$</div>
+          <p style="margin-bottom:0;">カッコの中は完全性関係そのもの、<span>$\sum_n|u_n\rangle\langle u_n| = I$</span>（単位行列）です。これをかけても何も変わりません。</p>
+        </div>
+      </details>
+      <details class="step">
+        <summary>ステップ4 — 結論</summary>
+        <div class="step-body">
+          <p>単位行列が消えて、最終的に非常にシンプルな形が残ります。</p>
+          <div class="eq center">$$ \langle\hat A\rangle = \langle\psi|\hat A|\psi\rangle $$</div>
+          <p style="margin-bottom:0;">状態 <span>$|\psi\rangle$</span> における物理量 <span>$\hat A$</span> の期待値は、状態ベクトルで <span>$\hat A$</span> を挟んでブラケットを取るだけで求まります。積分も総和の記号ももう出てきません——これがブラケット記法の威力です。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 700 22"><path d="M0 11 Q 50 2, 100 11 T 200 11 T 300 11 T 400 11 T 500 11 T 600 11 T 700 11"/></svg>
+
+  <!-- ============ まとめ ============ -->
+  <section class="block">
+    <div class="kicker"><span class="num">07</span><span class="label">まとめ</span></div>
+    <h2 class="title">今日の要点</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="card-n">・</div>
+        <h4>波動関数はベクトル</h4>
+        <p>波動関数はベクトル空間のベクトルと同じ性質（重ね合わせ・展開・内積）を満たす。</p>
+      </div>
+      <div class="card">
+        <div class="card-n">・</div>
+        <h4>ブラケット記法</h4>
+        <p>ケット |v⟩、ブラ ⟨v|、内積 ⟨u|v⟩、外積 |v⟩⟨u|、演算子の作用をこの記法で統一的に表現できる。</p>
+      </div>
+      <div class="card">
+        <div class="card-n">・</div>
+        <h4>状態ベクトルへ</h4>
+        <p>波動関数の満たす性質は、状態ベクトル |ψ⟩ を使ってより抽象的に、より簡潔に表現できる。</p>
+      </div>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 700 22"><path d="M0 11 Q 50 20, 100 11 T 200 11 T 300 11 T 400 11 T 500 11 T 600 11 T 700 11"/></svg>
+
+  <!-- ============ 理解度チェック ============ -->
+  <section class="block">
+    <div class="kicker"><span class="num">08</span><span class="label">理解度チェック</span></div>
+    <h2 class="title">自分で手を動かしてみよう</h2>
+    <p>次のように与えられる状態ベクトルを考えます。<span>$|1\rangle,|2\rangle,|3\rangle$</span> は正規直交基底で、それぞれ <span>$(1,0,0)^T,(0,1,0)^T,(0,0,1)^T$</span> と表されます。</p>
+    <div class="eq center">$$ |\psi\rangle = c_1|1\rangle + c_2|2\rangle + c_3|3\rangle $$</div>
+    <p class="muted">答えを考えてから「答えを見る」を押してください。授業内での模範解答をもとにしています。</p>
+
+    <div class="quiz-item">
+      <p><span class="q-num">Q1.</span> 展開係数 <span>$c_2$</span> をブラケット（内積の形）で表せ。</p>
+      <button class="reveal-btn" data-target="a1">答えを見る</button>
+      <div class="answer" id="a1">
+        <p class="a-label">答え</p>
+        <div class="eq">$$ c_2 = \langle 2|\psi\rangle $$</div>
+        <p class="a-label" style="margin-top:14px;">解説</p>
+        <p style="margin-bottom:0;"><span>$|1\rangle,|2\rangle,|3\rangle$</span> は正規直交基底なので、<span>$\langle 2|1\rangle=0,\ \langle 2|2\rangle=1,\ \langle 2|3\rangle=0$</span> です。<span>$|\psi\rangle=c_1|1\rangle+c_2|2\rangle+c_3|3\rangle$</span> に左から <span>$\langle 2|$</span> をかけると、<span>$c_1,c_3$</span> にかかる項はゼロになって消え、<span>$c_2\langle 2|2\rangle=c_2$</span> だけが残ります。「知りたい成分の番号のブラをかける」というのが展開係数を取り出す基本の型です。</p>
+      </div>
+    </div>
+
+    <div class="quiz-item">
+      <p><span class="q-num">Q2.</span> 演算子 <span>$\hat P_3 = |3\rangle\langle 3|$</span> を状態 <span>$|\psi\rangle$</span> に作用させた結果を示せ。</p>
+      <button class="reveal-btn" data-target="a2">答えを見る</button>
+      <div class="answer" id="a2">
+        <p class="a-label">答え</p>
+        <div class="eq">$$ \hat P_3|\psi\rangle = c_3|3\rangle $$</div>
+        <p class="a-label" style="margin-top:14px;">解説</p>
+        <p style="margin-bottom:0;"><span>$\hat P_3=|3\rangle\langle 3|$</span> を <span>$|\psi\rangle$</span> に作用させると <span>$|3\rangle\langle 3|\psi\rangle$</span> となり、<span>$\langle 3|\ |\psi\rangle$</span> の部分がまず内積として計算されます。Q1と同じ理由で <span>$\langle 3|\psi\rangle=c_3$</span>（ただの複素数）になるので、残るのは「<span>$c_3$</span> 倍された <span>$|3\rangle$</span>」だけです。射影演算子は、こうして状態ベクトルから特定の1方向の成分だけを抜き出し、他の方向をすべてゼロにする働きをします。</p>
+      </div>
+    </div>
+
+    <div class="quiz-item">
+      <p><span class="q-num">Q3.</span> <span>$|\psi\rangle$</span> のノルムの2乗を計算せよ。</p>
+      <button class="reveal-btn" data-target="a3">答えを見る</button>
+      <div class="answer" id="a3">
+        <p class="a-label">答え</p>
+        <div class="eq">$$ \langle\psi|\psi\rangle = |c_1|^2+|c_2|^2+|c_3|^2 $$</div>
+        <p class="a-label" style="margin-top:14px;">解説</p>
+        <p style="margin-bottom:0;"><span>$\langle\psi|=c_1^*\langle 1|+c_2^*\langle 2|+c_3^*\langle 3|$</span> と <span>$|\psi\rangle=c_1|1\rangle+c_2|2\rangle+c_3|3\rangle$</span> をかけ合わせると、<span>$3\times3=9$</span> 通りの組み合わせが出てきます。しかし正規直交性 <span>$\langle i|j\rangle=\delta_{ij}$</span> により、添字が異なる組（例えば <span>$c_1^*c_2\langle 1|2\rangle$</span>）はすべてゼロになって消え、添字が同じ組（<span>$c_n^*c_n\langle n|n\rangle=|c_n|^2$</span>）だけが生き残ります。だから対角成分の和だけが残る、というのがこの結果の中身です。</p>
+      </div>
+    </div>
+
+    <div class="quiz-item">
+      <p><span class="q-num">Q4.</span> <span>$|\psi\rangle$</span> はベクトルの形でどう書けるか。また <span>$\hat P_3$</span> は行列の形でどう書けるか。</p>
+      <button class="reveal-btn" data-target="a4">答えを見る</button>
+      <div class="answer" id="a4">
+        <p class="a-label">答え</p>
+        <div class="eq">$$ |\psi\rangle = \begin{pmatrix}c_1\\c_2\\c_3\end{pmatrix}, \qquad \hat P_3 = \begin{pmatrix}0&0&0\\0&0&0\\0&0&1\end{pmatrix} $$</div>
+        <p class="a-label" style="margin-top:14px;">解説</p>
+        <p><span>$|\psi\rangle$</span> は基底 <span>$|1\rangle,|2\rangle,|3\rangle$</span> に関して展開されているので、そのまま展開係数を上から順に並べれば列ベクトルになります。基底そのものが「n番目だけ1、あとは0」の列ベクトルだったことを思い出すと、<span>$c_1|1\rangle+c_2|2\rangle+c_3|3\rangle$</span> を足し合わせた結果がちょうど <span>$(c_1,c_2,c_3)^T$</span> になることが確認できます。</p>
+        <p style="margin-bottom:0;">一方 <span>$\hat P_3=|3\rangle\langle 3|$</span> は外積なので行列になります。<span>$|3\rangle=(0,0,1)^T$</span>、<span>$\langle3|=(0,0,1)$</span> の外積を成分ごとに計算すると、3行3列目だけが <span>$1\times1=1$</span> になり、それ以外の成分はどこかに0がかかるのですべて0になります。射影演算子の行列は、対応する成分だけ1で、あとは全部0の対角行列になる——これはどの基底ベクトルの射影演算子でも同じパターンです。</p>
+      </div>
+    </div>
+
+    <h3 class="sub">演習問題（次回までに解いてみよう）</h3>
+    <p>次の状態ベクトルを考えます（<span>$C$</span> は正の実定数、<span>$|1\rangle,|2\rangle,|3\rangle$</span> は正規直交固有状態）。</p>
+    <div class="eq center">$$ |\psi\rangle = C\big(|1\rangle + 2i|2\rangle - |3\rangle\big) $$</div>
+    <p>また演算子 <span>$\hat A$</span> は次の固有値方程式を満たします（<span>$a$</span> は正の実定数）。</p>
+    <div class="eq center">$$ \hat A|1\rangle = a|1\rangle,\quad \hat A|2\rangle = 0,\quad \hat A|3\rangle = -a|3\rangle $$</div>
+    <div class="box def">
+      <p class="box-label">問題</p>
+      <p>1. ブラ <span>$\langle\psi|$</span> を行ベクトルの形で求めよ。</p>
+      <p>2. ノルムの2乗 <span>$\langle\psi|\psi\rangle$</span> を計算し、<span>$\langle\psi|\psi\rangle=1$</span> となるように <span>$C$</span> を求めよ。</p>
+      <p>3. <span>$\hat A$</span> を観測したとき、<span>$a,0,-a$</span> を測定する確率をそれぞれ求めよ。</p>
+      <p style="margin-bottom:0;">4. <span>$\hat A$</span> を行列の形で表せ。</p>
+    </div>
+    <p class="muted">ヒント：この問題は今日の全部の道具——ブラの作り方、内積、Born則、固有方程式からの行列の組み立て——を一通り使います。上の理解度チェックと同じ手順をなぞればすべて解けます。まずは自分で解いてから、下のボタンで答え合わせしてください。</p>
+
+    <button class="reveal-btn" data-target="ex1-answer">解答・解説を見る</button>
+    <div class="answer" id="ex1-answer" style="margin-top:16px;">
+
+      <h3 class="sub" style="margin-top:8px;">1. ブラ ⟨ψ| を求める</h3>
+      <p>ブラはケットの成分を転置して複素共役をとったものでした。<span>$|\psi\rangle = C|1\rangle + 2iC|2\rangle - C|3\rangle$</span> の各係数の複素共役をとります。<span>$C$</span> は実数なのでそのまま、<span>$2i$</span> の複素共役は <span>$-2i$</span>、<span>$-1$</span> の複素共役は <span>$-1$</span> です。</p>
+      <div class="eq center">$$ \langle\psi| = C\big(\langle 1| - 2i\langle 2| - \langle 3|\big) = \big(C,\ -2iC,\ -C\big) $$</div>
+
+      <h3 class="sub">2. ノルムの2乗と C の決定</h3>
+      <p>⟨ψ|ψ⟩ は、1で求めたブラの各成分と、元のケットの対応する成分をかけて足し合わせます（|1⟩,|2⟩,|3⟩ は正規直交なので、異なる添字同士の掛け算はすべて消えます）。</p>
+      <div class="eq center">$$ \langle\psi|\psi\rangle = C\cdot C + (-2iC)\cdot 2iC + (-C)\cdot(-C) = C^2 + 4C^2 + C^2 = 6C^2 $$</div>
+      <p style="margin-bottom:0;">これが1になるように <span>$C$</span>（正の実数）を選ぶので、</p>
+      <div class="eq center">$$ 6C^2 = 1 \quad\Longrightarrow\quad C = \frac{1}{\sqrt6} $$</div>
+
+      <h3 class="sub">3. 測定確率（Born則）</h3>
+      <p>|ψ⟩ の展開係数は <span>$c_1=C,\ c_2=2iC,\ c_3=-C$</span> です。固有値方程式 <span>$\hat A|1\rangle=a|1\rangle,\ \hat A|2\rangle=0|2\rangle,\ \hat A|3\rangle=-a|3\rangle$</span> から、<span>$|1\rangle$</span> は固有値 <span>$a$</span>、<span>$|2\rangle$</span> は固有値 <span>$0$</span>、<span>$|3\rangle$</span> は固有値 <span>$-a$</span> に対応することがわかります。Born則 <span>$P=|c_n|^2$</span> をそれぞれに当てはめます。</p>
+      <div class="eq center">$$ P(a) = |c_1|^2 = C^2 = \frac16, \qquad P(0) = |c_2|^2 = |2iC|^2 = 4C^2 = \frac23, \qquad P(-a) = |c_3|^2 = C^2 = \frac16 $$</div>
+      <p style="margin-bottom:0;">検算として全部を足すと <span>$\frac16+\frac23+\frac16 = 1$</span> になり、確率の総和が1になる公理3の要請とちゃんと一致しています。<span>$2i$</span> の絶対値をとるとき、複素数部分の <span>$i$</span> は消えて実数の確率になる点に注意してください（<span>$|2i|^2 = (2i)(-2i) = 4$</span>）。</p>
+
+      <h3 class="sub">4. 演算子 Â を行列で表す</h3>
+      <p>基底 |1⟩,|2⟩,|3⟩ に関して、<span>$\hat A$</span> は各基底ベクトルに作用させたときにそのベクトル自身の定数倍を返す（固有ベクトルになっている）ので、行列は対角行列になります。対角成分にそれぞれの固有値を並べるだけです。</p>
+      <div class="eq center">$$ \hat A = \begin{pmatrix} a & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & -a \end{pmatrix} $$</div>
+      <p style="margin-bottom:0;">1行目・1列目が |1⟩ 方向（固有値 a）、2行目・2列目が |2⟩ 方向（固有値 0）、3行目・3列目が |3⟩ 方向（固有値 -a）に対応しています。理解度チェックの <span>$\hat P_3$</span> と同じ考え方——「基底ベクトルに対する固有値方程式が、そのまま行列の対角成分になる」——がここでも使われています。</p>
+    </div>
+  </section>
+
+  <p class="note wrap" style="max-width:none;">講義中の補足：前期の試験の平均点が低かったのは、こうした具体的な計算練習が不足していたためかもしれない、とのことでした。後期はこの理解度チェックのような演習を重視していく方針だそうです。定義を読むだけでなく、実際に手を動かして計算することを心がけましょう。</p>
+
+</main>
+
+<footer>
+  量子力学1B・第1講の講義スライドと講義音声の文字起こしをもとに作成した学習ガイドです。
+</footer>
+
+<script>
+  // theme toggle: cycles auto -> light -> dark -> auto
+  (function(){
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    var order = ['auto','light','dark'];
+    var saved = null;
+    try { saved = localStorage.getItem('qm-theme'); } catch(e) {}
+    var idx = order.indexOf(saved) >= 0 ? order.indexOf(saved) : 0;
+    function apply(){
+      var mode = order[idx];
+      if (mode === 'auto') { root.removeAttribute('data-theme'); }
+      else { root.setAttribute('data-theme', mode); }
+      try { localStorage.setItem('qm-theme', mode); } catch(e) {}
+    }
+    apply();
+    btn.addEventListener('click', function(){
+      idx = (idx + 1) % order.length;
+      apply();
+    });
+  })();
+
+  // reveal answers
+  document.querySelectorAll('.reveal-btn').forEach(function(b){
+    b.addEventListener('click', function(){
+      var t = document.getElementById(b.getAttribute('data-target'));
+      var showing = t.classList.toggle('shown');
+      b.textContent = showing ? '答えを隠す' : '答えを見る';
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([t]);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
